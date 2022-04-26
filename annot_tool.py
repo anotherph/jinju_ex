@@ -19,53 +19,74 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-def click_and_crop(event, x, y, flags, param):
-	# grab references to the global variables
+# def mouse_handler(event, x, y, flags, data):
+#     if event == cv2.EVENT_LBUTTONDOWN:
+#         cv2.circle(data['image'],(x,y),3,(0,0,255),-1)
+#         cv2.imshow('image',data['image'])
+        
+#         if len(data['points'])<4:
+#             data['points'].append([x,y])
 
-    count=0
-    if event == cv2.EVENT_LBUTTONDOWN:
-        if count==0:
-            refPt = [(x, y)]
-            count+=1
-        else:
-            refPt.append((x, y))
-            count+=1
-            
-    return refPt
+# def get_points(image):
+#     data ={}
+#     data['image']=image.copy()
+#     data['points']=[]
+    
+#     cv2.imshow('image',image)
+#     cv2.setMouseCallback("image", mouse_handler,data)
+#     cv2.waitKey()
+    
+#     points=np.array(data['points'],dtype=float)
+    
+#     return points
+
+def mouse_handler(event, x, y, flags, data):
+    if event == cv2.EVENT_LBUTTONDOWN:   # visible point 
+        cv2.circle(data['image'],(x,y),3,(0,0,255),-1)
+        cv2.imshow('image',data['image'])
+        
+        if len(data['points'])<4:
+            data['points'].append([x,y,1])
+    elif event == cv2.EVENT_RBUTTONDOWN: # invisible point
+        data['points'].append([0,0,0])
+    else:
+        pass
+
+def get_points(image):
+    data ={}
+    data['image']=image.copy()
+    data['points']=[]
+    
+    cv2.imshow('image',image)
+    cv2.setMouseCallback("image", mouse_handler,data)
+    cv2.waitKey()
+    
+    points=np.array(data['points'],dtype=float)
+    
+    return points
  
 if __name__ == "__main__":
 
-    root_annos='/home/jekim/workspace/jinju_ex/data_original/annos_left'
-    root_image='/home/jekim/workspace/jinju_ex/data_original/image_left'
-    desti_annos=''
+    root_annos='/home/jekim/workspace/jinju_ex/data_original/annos_stand'
+    root_image='/home/jekim/workspace/jinju_ex/data_original/image_stand'
+    desti_annos='/home/jekim/workspace/jinju_ex/data_stand/annos'
+    desti_image='/home/jekim/workspace/jinju_ex/data_stand/image'
     
-    # for file_name_temp in os.listdir(root_annos):
-    # file_name=file_name_temp.split('.')[0][:6]
-    file_name='002700'
-    name_annos = os.path.join(root_annos,file_name+'_keypoints.json')
-    name_image = os.path.join(root_image,file_name+'.jpg')
-    
-    with open(name_annos) as f: annos = json.load(f)
-    annos_edit=annos['people'][0]
-    annos_edit['knife']=list() # left front-end/left back-end /right front-end/right back-end
-    
-    image=cv2.imread(name_image)
-    clone=image
-    
-    # global refPt
-
-    while True:
-        cv2.imshow("image",image)
-        cv2.setMouseCallback("image", click_and_crop)
-        key=cv2.waitKey(1) & 0xFF
+    for file_name_temp in os.listdir(root_annos):
+        file_name=file_name_temp.split('.')[0][:6]
+    # file_name='002700'
+        name_annos = os.path.join(root_annos,file_name+'_keypoints.json')
+        name_image = os.path.join(root_image,file_name+'.jpg')
         
-        if key == ord("r"):
-            image = clone
-        elif key == ord("c"):
-            break
-
-    print(refPt)
+        with open(name_annos) as f: annos = json.load(f)
+        annos_edit=annos['people'][0]
+        annos_edit['knife']=list() # left front-end/left back-end /right front-end/right back-end
         
-        # with open("student_file.json", "w") as json_file:
-        # json.dump(student_data, json_file)
-
+        image=cv2.imread(name_image)    
+        points_src=get_points(image)
+        annos_edit['knife']=points_src.reshape(-1).tolist()
+        
+        cv2.destroyAllWindows()
+            
+        with open(os.path.join(desti_annos,file_name+'_keypoints.json'), "w") as json_file:
+            json.dump(annos_edit, json_file)
