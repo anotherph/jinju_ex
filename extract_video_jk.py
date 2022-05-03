@@ -43,3 +43,4 @@ video.release()
 
 # openpose 결과
 #./build/examples/openpose/openpose.bin --image_dir /home/jekim/workspace/jinju_ex/data_original/image_stand --write_json /home/jekim/workspace/jinju_ex/data_original/annos_stand
+#./build/examples/openpose/openpose.bin --model_pose coco --image_dir /home/jekim/workspace/jinju_ex/data_original/image_stand --write_json /home/jekim/workspace/jinju_ex/data_original/annos_stand
