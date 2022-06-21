@@ -339,7 +339,7 @@ if __name__ == "__main__":
     
         best_network = Network()
         best_network.cuda()
-        best_network.load_state_dict(torch.load('/home/jekim/workspace/jinju_ex/log/20220502_201236_df2op/df2op_73.pth')) 
+        best_network.load_state_dict(torch.load('/home/jekim/workspace/jinju_ex/log/20220503_105953_df2op/df2op_100.pth')) 
         best_network.eval()
         
         images, landmarks = next(iter(valid_loader))
