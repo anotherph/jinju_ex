@@ -7,6 +7,9 @@ resnet18 to detect the center of knife (instead of bbox regression)
 2. learning the cropped images to detect a center-point of knife
 
 edit of 'class Jinju_Dataset'
+use annos_split
+
+fine the end of knife
 
 @author: jekim
 """
@@ -30,6 +33,7 @@ import torchvision.models as models
 import json
 from pycocotools.coco import COCO 
 import pylab
+import random
 
 %matplotlib inline
 
@@ -43,25 +47,27 @@ class Jinju_Dataset(Dataset):
         self.num_class=1
 
     def __len__(self):
-        return len(os.listdir(self.root_image))
+        return len(os.listdir(self.root_annos))
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         
-        dir_list_img=os.listdir(self.root_image)
+        dir_list_img=os.listdir(self.root_annos)
         file_name=os.path.splitext(dir_list_img[idx])[0]
-        # file_name='00324'
-        
-        name_img = os.path.join(self.root_image,file_name+'.jpg')
-        image = io.imread(name_img)
-        
+              
         name_annos = os.path.join(self.root_annos,file_name+'.json')
         with open(name_annos) as f: annos = json.load(f)
         
+        name_img = os.path.join(self.root_image,annos['name of image'])
+        image = io.imread(name_img)
+        
         landmarks_pose=np.array(annos['body_keypoints']).reshape(-1,3)
                 
-        ind_hand = 9 # left hand: 9, right hand: 10
+        if annos['position']=='left':
+            ind_hand = 9 # left hand: 9, right hand: 10
+        elif annos['position']=='right':
+            ind_hand = 10 # left hand: 9, right hand: 10
         space=200
         bbox_0=int(landmarks_pose[ind_hand,0])-space
         if bbox_0<0: # small x 
@@ -77,29 +83,17 @@ class Jinju_Dataset(Dataset):
             bbox_3=image.shape[0]
         
         bbox = [bbox_0,bbox_1,bbox_2,bbox_3]
-        
-        # center=np.array(annos['bbox_left_center'])
-        center=np.array(annos['points_left'])
+        center=np.array(annos['points'])
         center=center[:2].reshape(1,2)
-        landmark_vis = np.zeros((1,2))
-               
-        # center=np.array(annos['bbox_right'])
-        # if center.tolist()==[0,0,0,0]:
-        #     center=landmarks_pose[ind_hand,:2]
-        #     center=center.reshape(-1,2)
-        #     landmark_vis = np.zeros((1,2))
-        # else:
-        #     center=np.array([center[0]+center[2],center[1]+center[3]])/2
-        #     center=center.reshape(-1,2)
-        #     landmark_vis = np.ones((1,2))
-        
-        # landmark_vis = np.repeat(landmarks[:,-1],2,axis=0).reshape(-1,2)
+        landmark_vis = np.zeros((1,2))            
         
         sample = {'image': image, 'landmarks': center, 'bbox':bbox}
         
         # # '''plot'''
         # plt.imshow(image)
-        # plt.scatter(landmarks[:,0], landmarks[:,1], c = 'c', s = 5)
+        # plt.scatter(center[:,0], center[:,1], c = 'y', s = 10)
+        # plt.scatter(bbox[0],bbox[1],c='b',s=5)
+        # plt.scatter(bbox[2],bbox[3],c='r',s=5)
         # plt.show()
 
         if self.transform:
@@ -298,8 +292,8 @@ def print_overwrite(step, total_step, loss, operation):
     
 if __name__ == "__main__":       
     
-    train_img_dir = "/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset/images"
-    train_json_path ="/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset/annos"
+    train_img_dir = "/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/images"
+    train_json_path ="/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/annos_split"
 
     data_transform = transforms.Compose([
         HandCrop(),
@@ -310,13 +304,13 @@ if __name__ == "__main__":
     ])
     
     dataset = Jinju_Dataset(root_image=train_img_dir,root_annos=train_json_path,transform=data_transform)
-    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [1900, 100])
+    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [4251,1063])
     
     image, landmarks=dataset_valid[6] # check the data and length of tensor
     temp=image.cpu().detach().numpy()
     plt.imshow(temp.transpose(1,2,0))
     
-    batch_size= 8
+    batch_size= 32
     train_loader = DataLoader(dataset_train, batch_size=batch_size,shuffle=True, num_workers=0)
     valid_loader = DataLoader(dataset_valid, batch_size=batch_size,shuffle=True, num_workers=0)
     
@@ -353,12 +347,12 @@ if __name__ == "__main__":
     # criterion = network.cal_loss()
     # criterion = nn.CrossEntropyLoss()
     # optimizer = optim.Adam(network.parameters(), lr=0.0001)
-    optimizer = optim.Adam(network.parameters(), lr=1e-7)
+    optimizer = optim.Adam(network.parameters(), lr=1e-6)
     # optimizer = optim.Adam(network.model.fc.parameters(),lr=0.0001) # turning the last fc layer 
     # optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.9)
     
     loss_min = np.inf
-    num_epochs = 35
+    num_epochs = 50
     num_class = 1
     
     start_time = time.time()
