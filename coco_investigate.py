@@ -53,17 +53,17 @@ annIds = coco.getAnnIds(imgIds=img['id'], catIds=catIds, iscrowd=None)
 anns = coco.loadAnns(annIds) 
 coco.showAnns(anns)
 
-# initialize COCO api for person keypoints annotations 
-annFile = '{}/annotations/person_keypoints_{}.json'.format(dataDir,dataType) 
-coco_kps=COCO(annFile)
+# # initialize COCO api for person keypoints annotations 
+# annFile = '{}/annotations/person_keypoints_{}.json'.format(dataDir,dataType) 
+# coco_kps=COCO(annFile)
 
-# load and display keypoints annotations 
-plt.imshow(I); 
-plt.axis('off') 
-ax = plt.gca() 
-annIds = coco_kps.getAnnIds(imgIds=img['id'], catIds=catIds, iscrowd=None) 
-anns = coco_kps.loadAnns(annIds) 
-coco_kps.showAnns(anns)
+# # load and display keypoints annotations 
+# plt.imshow(I); 
+# plt.axis('off') 
+# ax = plt.gca() 
+# annIds = coco_kps.getAnnIds(imgIds=img['id'], catIds=catIds, iscrowd=None) 
+# anns = coco_kps.loadAnns(annIds) 
+# coco_kps.showAnns(anns)
 
 
 

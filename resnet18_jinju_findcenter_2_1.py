@@ -314,8 +314,8 @@ def print_overwrite(step, total_step, loss, operation):
     
 if __name__ == "__main__":       
     
-    train_img_dir = "/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/images"
-    train_json_path ="/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/annos_split"
+    train_img_dir = "/home/jekim/workspace/jinju_ex/data/0720_SGU/dataset_knife/images"
+    train_json_path ="/home/jekim/workspace/jinju_ex/data/0720_SGU/dataset_knife/annos_split"
 
     data_transform = transforms.Compose([
         HandCrop(),
@@ -326,7 +326,7 @@ if __name__ == "__main__":
     ])
     
     dataset = Jinju_Dataset(root_image=train_img_dir,root_annos=train_json_path,transform=data_transform)
-    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [4251,1063])
+    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [1051,263])
     
     image, landmarks=dataset_valid[6] # check the data and length of tensor
     temp=image.cpu().detach().numpy()
@@ -342,7 +342,7 @@ if __name__ == "__main__":
     ''' train '''
     
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    dir_log= os.path.join("/home/jekim-server/workspace/jinju_ex/log",timestr+'_df2op')
+    dir_log= os.path.join("/home/jekim/workspace/jinju_ex/log",timestr+'_df2op')
     os.makedirs(dir_log)
     
     '''load Network'''

@@ -16,9 +16,7 @@ main code contains below:
     input: the center of knife, original image
     output: the landmarks of knife corresponding to the original image
 
-
 To do list     
-# draw the box and center of the knife
 # edit code when handposition is not detected
     
 @author: jekim
@@ -37,6 +35,7 @@ from skimage.color import rgb2gray
 import torchvision.transforms.functional as TF
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import torchvision.models as models
@@ -44,7 +43,7 @@ import json
 from pycocotools.coco import COCO 
 import pylab
 
-%matplotlib inline
+# %matplotlib inline
     
 class CenterCrop(object):
     " crop image along bbox of which center is sample['center'] "
@@ -54,7 +53,7 @@ class CenterCrop(object):
         # image = sample[:,:,:3]
     
         '''bbox = [x1,y1,x2,y2]'''        
-        space=150
+        space=200
         bbox_0=int(position[0])-space
         bbox_1=int(position[1])-space
         bbox_2=int(position[0])+space
@@ -218,7 +217,6 @@ def landmark_Recursion(pose, landmarks):
 
 def infer_func(sample):
     
-    
     start_time = time.time()
     
     '''left'''
@@ -257,8 +255,6 @@ def infer_func(sample):
     print("---{:.4f}s seconds---".format(time.time()-start_time))
     
     return landmarks, center_position.reshape(2,2)
-
-
 
 def infer_center(net, sample, num_class):
     
@@ -345,6 +341,7 @@ if __name__ == "__main__":
     for file_name_temp in list_:
         file_name=file_name_temp.split('.')[0][:5]
         
+        # file_name='00241'
         # load image
         name_img = os.path.join(path_image,file_name+'.jpg')     
         image = io.imread(name_img)
@@ -354,22 +351,49 @@ if __name__ == "__main__":
         with open(name_annos) as f: annos = json.load(f)
                
         landmarks_pose=np.array(annos['pose_keypoints_2d']).reshape(-1,3)
-                
-        sample = {'image': image ,'pose':landmarks_pose}
-        landmarks, center=infer_func(sample)
+        
+        if landmarks_pose[9,:].tolist()==[0,0,0] or landmarks_pose[10,:].tolist()==[0,0,0]:     
+            landmarks=np.zeros((4,2))
+            center=np.zeros((2,2))            
+        else: 
+            sample = {'image': image ,'pose':landmarks_pose}
+            landmarks, center=infer_func(sample)
      
         '''display and save the result'''
+            
+        # fig, ax = plt.subplots()
+        plt.figure(figsize=(15,15*1080/1920))
+        ax = plt.gca()
+        ax.add_patch(
+              patches.Rectangle(
+                (center[0,0]-200, center[0,1]-200),
+                400,
+                400,
+                edgecolor = 'red',
+                # facecolor = 'red',
+                fill=False
+              ) )
         
-        # draw the box and center of the knife
+        ax.add_patch(
+              patches.Rectangle(
+                (center[1,0]-200, center[1,1]-200),
+                400,
+                400,
+                edgecolor = 'red',
+                # facecolor = 'red',
+                fill=False
+              ) )
         
-        plt.figure(figsize=(10,10))
-        plt.imshow(image)
         plt.scatter(landmarks[:,0], landmarks[:,1], c = 'y', s = 50)
         plt.scatter(center[:,0], center[:,1], c = 'r', s = 50)
-        # plt.Rectangle((center[0,:]-150).tolist(),300,300)
-        plt.xlim(0,image.shape[1])
-        plt.ylim(image.shape[0],0)
-        # plt.savefig(os.path.join('/home/jekim/workspace/jinju_ex/infer1/result/',file_name+'.png'))
-        a=1
+        plt.yticks(fontsize=16)
+        plt.xticks(fontsize=16)
+        plt.imshow(image)
+        # plt.show()
+        plt.savefig(os.path.join('/home/jekim/workspace/jinju_ex/infer1/result/',file_name+'.png'))
+        
+        
+        
+        
     
 

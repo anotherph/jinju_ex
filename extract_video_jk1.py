@@ -16,8 +16,8 @@ from glob import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
-videoname='/home/jekim/workspace/jinju_ex/data/IMG_0094.MOV'
-outpath='/home/jekim/workspace/jinju_ex/data/IMG_0094/'
+videoname='/home/jekim/workspace/jinju_ex/data/0720_SGU/original_video/iPhone/IMG_0135.MOV'
+outpath='/home/jekim/workspace/jinju_ex/data/0720_SGU/original_video/iPhone/IMG_0135/images'
 
 os.makedirs(outpath, exist_ok=True)
 video = cv2.VideoCapture(videoname)
@@ -33,11 +33,11 @@ for cnt in tqdm(range(totalFrames), desc='{:10s}'.format(os.path.basename(videon
     # if cnt >= end:break
     # if not ret:continue
     
-    temp_frame=frame # for the left shot
+    # temp_frame=frame # for the left shot
     # temp_frame=frame[80:620,650:1280] # for the right shot 
-    factor=2
-    img = cv2.resize(temp_frame, dsize=(temp_frame.shape[1]*factor, temp_frame.shape[0]*factor), interpolation=cv2.INTER_AREA)
-    cv2.imwrite(join(outpath, '{:06d}.jpg'.format(cnt)), img) 
+    # factor=2
+    # img = cv2.resize(temp_frame, dsize=(temp_frame.shape[1]*factor, temp_frame.shape[0]*factor), interpolation=cv2.INTER_AREA)
+    cv2.imwrite(join(outpath, '{:06d}.jpg'.format(cnt)), frame) 
 
 video.release()
 

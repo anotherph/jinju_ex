@@ -11,8 +11,8 @@ import numpy as np
 # path = '/home/jekim/workspace/EasyMocap-MJ1/etc/temp/'
 # pathOut ='/home/jekim/workspace/EasyMocap-MJ1/etc/sorigun.mp4'
 
-path = '/home/jekim/workspace/jinju_ex/data/white1/result_all'
-pathOut='/home/jekim/workspace/jinju_ex/data/white1/result_all/video.mp4'
+path = '/home/jekim/workspace/jinju_ex/data/0810_KETI/dataset/result'
+pathOut='/home/jekim/workspace/jinju_ex/data/0810_KETI/dataset/result/video_0810.mp4'
 
 paths = [os.path.join(path , i ) for i in os.listdir(path) if re.search(".png$", i )]
 ## 정렬 작업
@@ -29,7 +29,7 @@ paths = list(np.sort(store1)) + list(np.sort(store2))
 #len('ims/2/a/2a.2710.png')
 #pathIn= './jekim7/output/smpl/'
 
-fps = 30
+fps = 240
 import cv2
 frame_array = []
 for idx , path in enumerate(paths) : 

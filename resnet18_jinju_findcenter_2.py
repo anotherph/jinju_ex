@@ -68,7 +68,7 @@ class Jinju_Dataset(Dataset):
             ind_hand = 9 # left hand: 9, right hand: 10
         elif annos['position']=='right':
             ind_hand = 10 # left hand: 9, right hand: 10
-        space=200
+        space=150
         bbox_0=int(landmarks_pose[ind_hand,0])-space
         if bbox_0<0: # small x 
             bbox_0=0
@@ -92,8 +92,11 @@ class Jinju_Dataset(Dataset):
         # # '''plot'''
         # plt.imshow(image)
         # plt.scatter(center[:,0], center[:,1], c = 'y', s = 10)
+        # # plt.scatter(landmarks_pose[ind_hand,0],landmarks_pose[ind_hand,1], c = 'k',s=10)
+        # plt.scatter(landmarks_pose[:,0],landmarks_pose[:,1], c = 'm',s=10)
         # plt.scatter(bbox[0],bbox[1],c='b',s=5)
         # plt.scatter(bbox[2],bbox[3],c='r',s=5)
+        
         # plt.show()
 
         if self.transform:
@@ -143,7 +146,8 @@ class HandCrop(object):
     
         '''bbox = [x1,y1,x2,y2]'''        
         
-        image = image[bbox[1]: bbox[3], bbox[0]: bbox[2]]        
+        
+        image = image[bbox[1]: bbox[3], bbox[0]: bbox[2]]
         landmarks = np.array(landmarks) - np.array([bbox[0], bbox[1]])
         
         '''determine the landmarks exist in cropped image'''
@@ -154,9 +158,9 @@ class HandCrop(object):
             elif landmark[0]>image.shape[1] or landmark[1]>image.shape[0]:
                 landmarks[i,:]=[0, 0]
         
-        # plt.scatter(landmarks[:,0], landmarks[:,1], c = 'r', s = 5)
-        # plt.imshow(image)
-        
+        plt.scatter(landmarks[:,0], landmarks[:,1], c = 'r', s = 5)
+        plt.imshow(image)
+        # plt.show()
         return {'image': image, 'landmarks': landmarks}
 
 class Rescale_padding(object):
@@ -292,8 +296,8 @@ def print_overwrite(step, total_step, loss, operation):
     
 if __name__ == "__main__":       
     
-    train_img_dir = "/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/images"
-    train_json_path ="/home/jekim-server/workspace/jinju_ex/data/0720_SGU/dataset_knife/annos_split"
+    train_img_dir = "/home/jekim/workspace/jinju_ex/data/0720_SGU/dataset_knife/images"
+    train_json_path ="/home/jekim/workspace/jinju_ex/data/0720_SGU/dataset_knife/annos_split"
 
     data_transform = transforms.Compose([
         HandCrop(),
@@ -304,7 +308,8 @@ if __name__ == "__main__":
     ])
     
     dataset = Jinju_Dataset(root_image=train_img_dir,root_annos=train_json_path,transform=data_transform)
-    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [4251,1063])
+    # dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [661,165])
+    dataset_train, dataset_valid = torch.utils.data.random_split(dataset, [800,202])
     
     image, landmarks=dataset_valid[6] # check the data and length of tensor
     temp=image.cpu().detach().numpy()
@@ -320,7 +325,7 @@ if __name__ == "__main__":
     ''' train '''
     
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    dir_log= os.path.join("/home/jekim-server/workspace/jinju_ex/log",timestr+'_df2op')
+    dir_log= os.path.join("/home/jekim/workspace/jinju_ex/log",timestr+'_df2op')
     os.makedirs(dir_log)
     
     '''load Network'''

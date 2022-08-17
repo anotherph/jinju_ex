@@ -427,7 +427,7 @@ if __name__ == "__main__":
         plt.xticks(fontsize=16)
         plt.imshow(image)
         # plt.show()
-        plt.savefig(os.path.join('/home/jekim/workspace/jinju_ex/infer1/result1/',file_name+'.png'))
+        # plt.savefig(os.path.join('/home/jekim/workspace/jinju_ex/infer1/result1/',file_name+'.png'))
         
         
         
